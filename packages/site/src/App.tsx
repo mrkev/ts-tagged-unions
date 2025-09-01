@@ -1,18 +1,14 @@
-import { useState } from "react";
 import GitHubButton from "react-github-btn";
-import { add } from "../../NEW_LIB/src";
 import "./App.css";
 
 const FOLDER_STRUCTURE = `
 docs/             built website, configure GH Pages to point here
 packages/
-  NEW_LIB/        source for the library
+  ts-tagged-unions/        source for the library
   site/           source code for the site
 `.trim();
 
 export function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <>
       <h1>
@@ -91,9 +87,9 @@ export function App() {
         <br />
         The latest version is always built with the site:
       </p>
-      <button onClick={() => setCount((count) => add(count, 1))}>
+      {/* <button onClick={() => setCount((count) => add(count, 1))}>
         add one: {count}
-      </button>
+      </button> */}
       <p></p>
 
       <hr></hr>

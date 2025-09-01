@@ -11,7 +11,7 @@
   "dependencies": {
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "NEW_LIB": "workspace:*"
+    "ts-tagged-unions": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^24.3.0",

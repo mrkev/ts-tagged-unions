@@ -39,6 +39,7 @@ export default tseslint.config(
     rules: {
       ...react.configs.recommended.rules,
       ...react.configs["jsx-runtime"].rules,
+      "@typescript-eslint/no-explicit-any": "warn",
       "react/no-unescaped-entities": "off",
       "react-refresh/only-export-components": [
         "warn",
