@@ -1,120 +1,94 @@
-import GitHubButton from "react-github-btn";
 import "./App.css";
-
-const FOLDER_STRUCTURE = `
-docs/             built website, configure GH Pages to point here
-packages/
-  ts-tagged-unions/        source for the library
-  site/           source code for the site
-`.trim();
+// App.tsx
+import { useState } from "react";
+import Editor from "@monaco-editor/react";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import useLocalStorage from "use-local-storage";
+import { tryParse } from "../../ts-tagged-unions/src/index";
 
 export function App() {
+  const [source, setSource] = useState("// Type your code here...");
+  const [parseResult, setParseResult] = useState("// Type your code here...");
+  const [logs, setLogs] = useState<string>("");
+  const [savedSnippets] = useLocalStorage("ts-tagged-unions.savedSnippets", [
+    { id: 1, name: "saved typescript code 1", code: "// snippet 1" },
+    { id: 2, name: "saved typescript code 2", code: "// snippet 2" },
+  ]);
+
+  const onRun = () => {
+    try {
+      setLogs("");
+      const result = tryParse(source);
+      setParseResult(JSON.stringify(result, null, 2));
+    } catch (e) {
+      setLogs((e as any).message);
+    }
+  };
+
+  const onSave = () => {};
+
   return (
-    <>
-      <h1>
-        Simple
-        <br />
-        Vite + React + TypeScript
-        <br />
-        Monorepo Library Template
-      </h1>
+    <div className="h-screen w-screen flex">
+      {/* Sidebar */}
+      <div className="w-48 border-r p-2 flex flex-col gap-2">
+        {savedSnippets.map((s) => (
+          <button key={s.id} className="p-2 text-left border rounded">
+            {s.name}
+          </button>
+        ))}
+      </div>
 
-      <p>
-        <a href="https://github.com/mrkev/new-react-ts-monorepo-lib">
-          github.com/mrkev/new-react-ts-monorepo-lib
-        </a>
-      </p>
+      {/* Main content split: editors (left) + results (right) */}
+      <PanelGroup direction="horizontal">
+        <Panel defaultSize={50}>
+          {/* Top toolbar + editor + logs */}
+          <PanelGroup direction="vertical">
+            <Panel defaultSize={50}>
+              {/* Toolbar */}
+              <div className="flex gap-2 p-2 border-b">
+                <button className="px-3 py-1 border rounded" onClick={onRun}>
+                  Parse
+                </button>
+                <button className="px-3 py-1 border rounded" onClick={onSave}>
+                  Save
+                </button>
+              </div>
 
-      <GitHubButton
-        href="https://github.com/mrkev/new-react-ts-monorepo-lib"
-        data-color-scheme="no-preference: light; light: light; dark: dark;"
-        data-icon="octicon-star"
-        data-size="large"
-        aria-label="Star mrkev/new-react-ts-monorepo-lib on GitHub"
-      >
-        Star
-      </GitHubButton>
-      <GitHubButton
-        href="https://github.com/mrkev/new-react-ts-monorepo-lib/generate"
-        data-color-scheme="no-preference: light; light: light; dark: dark;"
-        data-icon="octicon-repo-template"
-        data-size="large"
-        aria-label="Use this template mrkev/new-react-ts-monorepo-lib on GitHub"
-      >
-        Use this template
-      </GitHubButton>
+              {/* Source Editor */}
+              <Editor
+                theme="vs-dark"
+                height="100%"
+                defaultLanguage="typescript"
+                value={source}
+                onChange={(val) => setSource(val ?? "")}
+                options={{ minimap: { enabled: false } }}
+              />
+            </Panel>
 
-      {/* Instructions */}
-      <h2 className="left">Getting Started</h2>
-      <ol style={{ textAlign: "left" }}>
-        <li>
-          Click <code>"Use Template"</code> above
-        </li>
-        <li>Clone the repo you created</li>
-        <li>Use these scripts:</li>
-        {/* Scripts */}
-        <ul style={{ textAlign: "left" }}>
-          <li>
-            <code>build</code> builds this website and the library ready for
-            publishing
-          </li>
-          <li>
-            <code>build:site</code> builds only the website
-          </li>
-          <li>
-            <code>build:lib</code> builds only the library
-          </li>
-          <li>
-            <code>dev</code> starts the dev server
-          </li>
-        </ul>
-        <li>Edit away! Folder structure:</li>
-        <pre
-          style={{
-            textAlign: "left",
-            background: "black",
-            color: "white",
-            padding: "2px 3px 1px 3px",
-          }}
-        >
-          {FOLDER_STRUCTURE}
-        </pre>
-      </ol>
-      <hr></hr>
+            <PanelResizeHandle className="h-1 hover:bg-gray-500 transition-colors" />
 
-      <p className="left">
-        This sample library just adds two numbers.
-        <br />
-        The latest version is always built with the site:
-      </p>
-      {/* <button onClick={() => setCount((count) => add(count, 1))}>
-        add one: {count}
-      </button> */}
-      <p></p>
+            <Panel defaultSize={20}>
+              {/* Logs Panel */}
+              <pre className="p-2 font-mono text-sm overflow-auto h-full">
+                {logs}
+              </pre>
+            </Panel>
+          </PanelGroup>
+        </Panel>
 
-      <hr></hr>
+        <PanelResizeHandle className="w-1 hover:bg-gray-500 transition-colors" />
 
-      <p
-        className="read-the-docs"
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          gap: "5px",
-          justifyContent: "center",
-        }}
-      >
-        <a href="https://aykev.dev/">Kevin Chavez</a> ·
-        <a href="https://twitter.com/aykev">@aykev</a> ·
-        <GitHubButton
-          href="https://github.com/mrkev"
-          data-color-scheme="no-preference: light; light: light; dark: dark;"
-          data-size="large"
-          data-show-count="true"
-          aria-label="Follow @mrkev on GitHub"
-        >
-          Follow @mrkev
-        </GitHubButton>
-      </p>
-    </>
+        <Panel defaultSize={30}>
+          {/* Result Editor (read-only) */}
+          <Editor
+            theme="vs-dark"
+            height="100%"
+            defaultLanguage="typescript"
+            value={parseResult}
+            options={{ readOnly: true, minimap: { enabled: false } }}
+          />
+        </Panel>
+      </PanelGroup>
+    </div>
   );
 }

@@ -32,5 +32,9 @@
     "type": "git",
     "url": "",
     "directory": ""
+  },
+  "dependencies": {
+    "@types/parsimmon": "^1.10.9",
+    "parsimmon": "^1.18.1"
   }
 }
